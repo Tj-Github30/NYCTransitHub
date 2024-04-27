@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nearest Stations</title>
+</head>
+<body>
+    <h1>Nearest Stations</h1>
+    <ul>
+        {% for station in data %}
+            <li>{{ station.name }}</li>
+        {% endfor %}
+    </ul>
+    <p>Last Updated: {{ updated }}</p>
+</body>
+</html>

@@ -1,0 +1,9 @@
+env
+*.sublime-*
+settings.cfg
+stops.txt
+transfers.txt
+*.log
+*.pyc
+.cache
+.DS_Store

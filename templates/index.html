@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTAPI</title>
+    <style>
+        body,
+        ul {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            /*  background-color: rgb(142, 214, 238); Set the background color to light blue */
+            font-family: Arial, sans-serif;
+            /* Use Arial font */
+            margin: 0;
+            /* Remove default margin */
+            padding: 0;
+            /* Remove default padding */
+        }
+
+        nav {
+            background-color: grey;
+            /* Set the background color of the navigation bar to grey */
+        }
+
+        nav ul {
+            list-style-type: none;
+            /* Remove default bullet points */
+            margin: 0;
+            /* Remove default margin */
+            padding: 0;
+            /* Remove default padding */
+            display: flex;
+            /* Use flexbox layout */
+            justify-content: space-around;
+            /* Distribute items evenly */
+        }
+
+        nav ul li a {
+            color: black;
+            /* Set text color to black */
+            text-decoration: none;
+            /* Remove underline from links */
+            padding: 5px 10px;
+            /* Add padding to links */
+            padding: 10px 20px;
+            /* Add padding to links */
+            font-size: 18px;
+            /* Increase font size */
+        }
+
+        nav ul li a:hover {
+            background-color: darkgrey;
+            /* Change background color on hover */
+        }
+    </style>
+</head>
+
+<body>
+    <h1>NYCT Transit App</h1>
+    <nav>
+        <ul>
+            {% for route in routes %}
+            <li><a href="/by-route/{{ route }}">{{ route }}</a></li>
+            {% endfor %}
+        </ul>
+    </nav>
+</body>
+
+</html>
