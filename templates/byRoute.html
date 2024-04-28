@@ -1,46 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stations on Route {{ route }}</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        .container {
-            display: flex;
-            flex-direction: column; /* Change to column */
-            flex-wrap: wrap;
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .station {
-            text-align: center;
-        }
-        .train-container {
-            display: flex;
-            text-align: center;
-            justify-content: center; /* Center the tables */
-            gap: 20px;
-        }
-        .train-table {
-            border-collapse: collapse;
-            width: 200px;
-        }
-        .train-table th, .train-table td {
-            padding: 8px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
-        .arrow {
-            font-size: 18px;
-            vertical-align: middle;
-            padding-right: 5px;
-        }
-    </style>
-</head>
-<body>
+{% extends 'base.html' %}
+
+{% block content %}
+
     <h1>Stations on Route {{ route }}</h1>
     <p>Last Updated: {{ updated }}</p>
 
@@ -52,7 +13,7 @@
                 <div class="train-container">
                     {% if station.N %}
                         <table class="train-table">
-                            <caption>N Trains</caption>
+                            <caption>North Bound</caption>
                             <thead>
                                 <tr>
                                     <th>▲ Route</th>
@@ -72,7 +33,7 @@
 
                     {% if station.S %}
                         <table class="train-table">
-                            <caption>S Trains</caption>
+                            <caption>South Bound</caption>
                             <thead>
                                 <tr>
                                     <th>▼ Route</th>
@@ -94,5 +55,4 @@
         {% endfor %}
     </div>
 
-</body>
-</html>
+    {% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+    <h1>Final Route</h1>
+    <p>Source Station: {{ source }}</p>
+    <p>Destination Station: {{ destination }}</p>
+    <p>Shortest Distance: {{ shortest_distance }}</p>
+
+ <h2>Route:</h2>
+    <ul>
+        {% for route_id in route %}
+            {% if route_id is not none %}
+                <li>{{ route_id }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+    <h2>Path:</h2>
+    <ul>
+        {% for station_id in path %}
+            <li>{{ stations[station_id]['name'] }}</li>
+        {% endfor %}
+    </ul> 
+<!-- 
+    <h2>Route:</h2>
+    <ul>
+        {% set current_route = route[1] %}
+        {% set current_stations = [] %}
+        {% for i in range(route|length) %}
+            {% if route[i] is not none %}
+                {% if route[i] == current_route %}
+                    {% set current_stations = current_stations + [stations[path[i]]['name']] %}
+                {% else %}
+                    <li>
+                        Take the {{ current_route }} train to {{ ', '.join(current_stations) }}
+                    </li>
+                    {% set current_route = route[i] %}
+                    {% set current_stations = [stations[path[i]]['name']] %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+        {% if current_stations %}
+            <li>
+                Take the {{ current_route }} train to {{ ', '.join(current_stations) }}
+            </li>
+        {% endif %}
+    </ul>-->
+</div>
+
+{% endblock %} 

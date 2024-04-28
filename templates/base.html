@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>NYCTransit</title>
+    </head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="/">Home</a></li>
+            {% for route in routes %}
+            <li><a href="/by-route/{{ route }}">{{ route }}</a></li>
+            {% endfor %}
+    
+    
+            <!-- Add other navigation links as needed -->
+        </ul>
+    </nav>
+
+    {% block content %}
+    {% endblock %}
+
+    <footer>
+        <!-- Footer content -->
+    </footer>
+
+    <!-- Include Socket.IO library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
+    <!-- Include your main JavaScript file -->
+    <script src="{{ url_for('static', filename='/js/app.js') }}"></script>
+
+</body>
+</html>

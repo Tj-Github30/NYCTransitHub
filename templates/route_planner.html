@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div>
+    <h1>Plan Your Route</h1>
+    <form action="/plan-route" method="post">
+        <label for="source">Source Station:</label>
+        <select name="source" id="source">
+            {% for station in stations %}
+                <option value="{{ station }}">{{ station }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <label for="destination">Destination Station:</label>
+        <select name="destination" id="destination">
+            {% for station in stations %}
+                <option value="{{ station }}">{{ station }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <input type="submit" value="Plan my route">
+    </form> 
+</div>
+{% endblock %}
