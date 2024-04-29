@@ -47,17 +47,17 @@ if app.debug:
     logging.basicConfig(level=logging.INFO,
         format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 
-class CustomJSONEncoder(json.JSONEncoder):
-    def default(self, obj):
-        try:
-            if isinstance(obj, datetime):
-                return obj.isoformat()
-            iterable = iter(obj)
-        except TypeError:
-            pass
-        else:
-            return list(iterable)
-        return JSONEncoder.default(self, obj)
+# class CustomJSONEncoder(json.JSONEncoder):
+#     def default(self, obj):
+#         try:
+#             if isinstance(obj, datetime):
+#                 return obj.isoformat()
+#             iterable = iter(obj)
+#         except TypeError:
+#             pass
+#         else:
+#             return list(iterable)
+#         return JSONEncoder.default(self, obj)
 
 mta = Mtapi(
     app.config['MTA_KEY'],

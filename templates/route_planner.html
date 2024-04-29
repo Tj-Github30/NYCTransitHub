@@ -1,10 +1,10 @@
 {% extends 'base.html' %} {% block content %}
 
-<div>
+<div style="width: 50%;">
   <h1>Plan Your Route</h1>
   <form action="/plan-route" method="post">
-    <label for="source">Source Station:</label>
-    <input list="source" name="source" id="source-input" />
+    <label class="form-label" for="source">Source Station:</label>
+    <input class="form-control" list="source" name="source" id="source-input" placeholder="Enter source station name" />
     <datalist id="source">
       {% for station in stations %}
       <option value="{{ station }}">{{ station }}</option>
@@ -13,8 +13,8 @@
 
     <br /><br />
 
-    <label for="destination">Destination Station:</label>
-    <input list="destination" name="destination" id="destination-input" />
+    <label class="form-label" for="destination">Destination Station:</label>
+    <input class="form-control" list="destination" name="destination" id="destination-input" placeholder="Enter destination station name" />
     <datalist id="destination">
       {% for station in stations %}
       <option value="{{ station }}">{{ station }}</option>
@@ -23,7 +23,8 @@
 
     <br /><br />
 
-    <input type="submit" value="Plan my route" />
+    <input type="submit" class="btn btn-outline-primary mt-3" value="Plan my route" />
+    <!-- <button type="submit" class="btn btn-outline-primary mt-3">Search</button> -->
   </form>
 </div>
 
