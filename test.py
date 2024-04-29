@@ -1,109 +1,95 @@
-from math import radians, sin, cos, sqrt, atan2
+
+
+# def save_adjacency_map_to_file(adjacency_map, filename):
+    # with open(filename, 'w') as file:
+    #     for station, connections in adjacency_map.items():
+    #         # Convert the set of connections to a comma-separated string
+    #         connections_str = ', '.join(connections)
+    #         # Write station and its connections to the file
+    #         file.write(f"{station}: {connections_str}\n")
+
 import json
-import heapq
+from collections import deque
 
-def dijkstra(adjacency_map, start, end):
-    # Initialize distances, routes, and previous nodes
-    distances = {node: float('inf') for node in adjacency_map}
-    routes = {node: None for node in adjacency_map}
-    prev = {node: None for node in adjacency_map}
-    distances[start] = 0
+def find_shortest_path(graph, start, goal):
+    queue = deque([[start]])
     
-    # Initialize priority queue
-    pq = [(0, start, None)]  # Include start route as None
+    visited = set()
+
+    while queue:
+        path = queue.popleft()
+        vertex = path[-1]
+        if vertex == goal:
+            return path
+        elif vertex not in visited:
+            visited.add(vertex)
+            for current_neighbour in graph.get(vertex, []):
+                new_path = list(path)
+                new_path.append(current_neighbour)
+                queue.append(new_path)
+                print(queue)
+    return "No path found."
     
-    while pq:
-        # Get node with smallest distance
-        curr_distance, curr_node, curr_route = heapq.heappop(pq)
 
-        # If node already visited, skip
-        if curr_distance > distances[curr_node]:
-            continue
+def create_adjacency_map(stations_data):
+    # Extract routes for each station using station names as keys
+    stations_routes = {details['name']: details['routes'] for _, details in stations_data.items()}
 
-        # Update route for the current node
-        routes[curr_node] = curr_route
-
-        # If destination reached, reconstruct path and return
-        if curr_node == end:
-            path = []
-            route = []
-            while curr_node is not None:
-                path.append(curr_node)
-                route.append(routes[curr_node])  # Append current route
-                curr_node = prev[curr_node]  # Update current node
-            path.reverse()
-            route.reverse()
-            return round(distances[end], 2), path, route
-        
-        # Visit neighbors
-        for neighbor, route, weight in adjacency_map[curr_node]:
-            distance = curr_distance + weight
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
-                prev[neighbor] = curr_node
-                heapq.heappush(pq, (distance, neighbor, route))  # Include current route
-    
-    # If destination not reachable
-    return float('inf'), [], []
-
-
-
-
-
-
-def calculate_distance(lat1, lon1, lat2, lon2):
-    R = 6371  # Radius of the Earth in kilometers
-
-    # Convert latitude and longitude from degrees to radians
-    lat1_rad = radians(lat1)
-    lon1_rad = radians(lon1)
-    lat2_rad = radians(lat2)
-    lon2_rad = radians(lon2)
-
-    # Calculate the differences between latitudes and longitudes
-    dlat = lat2_rad - lat1_rad
-    dlon = lon2_rad - lon1_rad
-
-    # Calculate the distance using Haversine formula
-    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    distance = R * c
-
-    return round(distance, 2)
-
-def build_adjacency_map(station_data, threshold_distance):
+    # Create an adjacency map where keys are station names and values are sets of adjacent station names
     adjacency_map = {}
 
-    for station_id1, station1 in station_data.items():
-        adjacent_stations = []
-        for station_id2, station2 in station_data.items():
-            if station_id1 != station_id2:
-                distance = calculate_distance(station1['location'][0], station1['location'][1],
-                                              station2['location'][0], station2['location'][1])
-                if distance <= threshold_distance:
-                    for route in station1['routes']:  # Include routes from station1
-                        adjacent_stations.append((station_id2, route, distance))
-        adjacency_map[station_id1] = adjacent_stations
+    for station_name, routes in stations_routes.items():
+        adjacency_map[station_name] = list()
+        for other_station_name, other_routes in stations_routes.items():
+            if station_name != other_station_name and set(routes).intersection(other_routes):
+                adjacency_map[station_name].append(other_station_name)
 
     return adjacency_map
 
 
 
+def load_adjacency_map_from_string(data):
+    adjacency_map = {}
+    # lines = data.splitlines()  # This splits the string into lines, simulating reading lines from a file
+    for line in data:
+        parts = line.strip().split(': ')
+        if len(parts) == 2:
+            station, connected_stations = parts
+            adjacency_map[station] = set(connected_stations.split(', '))
+        elif len(parts) == 1 and parts[0]:  # Non-empty line with just a station name
+            adjacency_map[parts[0]] = set()  # Add station with no connections
+    return adjacency_map
 
-# Read station data from JSON file 
-with open('data/stations_test.json', 'r') as f:
-    station_data = json.load(f)
-threshold_distance = 1.0  
-adjacency_map = build_adjacency_map(station_data, threshold_distance)
-#print(adjacency_map)
-start_node = '140'
-end_node = '110'
-shortest_distance = dijkstra(adjacency_map, start_node, end_node)
-shortest_distance, path, route = dijkstra(adjacency_map, start_node, end_node)
+
+# Usage
+# Ensure to load the JSON file into a dictionary
+with open('data/stations_test.json', 'r') as file:
+    stations_data = json.load(file)
+
+
+# Create the adjacency map
+adjacency_map = create_adjacency_map(stations_data)
+
+map = load_adjacency_map_from_string(adjacency_map)
+
+# filename = 'data/abcd.txt'
+# save_adjacency_map_to_file(adjacency_map, filename)
+
+
 # Print the adjacency map for debugging
-# print("Adjacency Map:")
-# for station, neighbors in adjacency_map.items():
-#     print(station, "->", neighbors)
-print("Shortest distance from", start_node, "to", end_node, ":", shortest_distance)
-print("Path:", path)
-print("Route: ", route)
+print("Adjacency Map:")
+for station, neighbors in adjacency_map.items():
+    if(station=='Jay St-MetroTech'):
+        print(station, "->", neighbors)
+
+# Example usage:
+start_station = "Jay St-MetroTech"
+end_station = "Dyckman St"
+shortest_path = find_shortest_path(adjacency_map, start_station, end_station)
+print("Shortest path:", shortest_path)
+
+stations_name_for_print = set()
+for _,details in stations_data.items():
+   stations_name_for_print.add(details['name'])
+
+print("ALL STATIONS LIST",stations_name_for_print)

@@ -1,34 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>NYCTransit</title>
-    </head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NYCTransit</title>
+  </head>
+  <body>
     <nav>
-        <ul>
-            <li><a href="/">Home</a></li>
-            {% for route in routes %}
+      <ul>
+        <li><a href="/">Home</a></li>
+        <!-- {% for route in routes %}
             <li><a href="/by-route/{{ route }}">{{ route }}</a></li>
-            {% endfor %}
-    
-    
-            <!-- Add other navigation links as needed -->
-        </ul>
+            {% endfor %} -->
+        <li><a href="/by-route/1">1</a></li>
+        <li><a href="/by-route/2">2</a></li>
+        <li><a href="/by-route/3">3</a></li>
+        <li><a href="/by-route/4">4</a></li>
+        <li><a href="/by-route/5">5</a></li>
+        <li><a href="/by-route/6">6</a></li>
+        <li><a href="/by-route/7">7</a></li>
+        <li><a href="/by-route/A">A</a></li>
+        <li><a href="/by-route/C">C</a></li>
+        <li><a href="/by-route/E">E</a></li>
+        <li><a href="/by-route/N">N</a></li>
+        <li><a href="/by-route/Q">Q</a></li>
+        <li><a href="/by-route/R">R</a></li>
+        <li><a href="/by-route/W">W</a></li>
+        <li><a href="/by-route/B">B</a></li>
+        <li><a href="/by-route/D">D</a></li>
+        <li><a href="/by-route/F">F</a></li>
+        <li><a href="/by-route/M">M</a></li>
+        <li><a href="/by-route/L">L</a></li>
+        <li><a href="/by-route/G">G</a></li>
+        <li><a href="/by-route/J">J</a></li>
+        <li><a href="/by-route/Z">Z</a></li>
+
+        <!-- Add other navigation links as needed -->
+      </ul>
     </nav>
 
-    {% block content %}
-    {% endblock %}
+    {% block content %} {% endblock %}
 
     <footer>
-        <!-- Footer content -->
+      <!-- Footer content -->
     </footer>
 
     <!-- Include Socket.IO library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.3.1/socket.io.js"></script>
     <!-- Include your main JavaScript file -->
     <script src="{{ url_for('static', filename='/js/app.js') }}"></script>
-
-</body>
+  </body>
 </html>

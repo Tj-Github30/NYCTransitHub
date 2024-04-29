@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Station Search</title>
+  </head>
+  <body>
+    <h1>Search for a Station</h1>
+    <form action="/by-stations" method="post">
+      <input
+        list="station"
+        name="station_name"
+        id="station_name-input"
+        placeholder="Enter station name"
+      />
+      <datalist id="station">
+        {% for station in stations %}
+        <option value="{{ station }}">{{ station }}</option>
+        {% endfor %}
+      </datalist>
+      <button type="submit">Search</button>
+    </form>
+  </body>
+</html>

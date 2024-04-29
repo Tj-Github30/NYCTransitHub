@@ -10,7 +10,7 @@
 """
 
 from mtapi.mtapi import Mtapi
-from flask import Flask, jsonify, request, Response, render_template, abort, redirect
+from flask import Flask, jsonify, request, Response, render_template, abort, redirect, url_for
 import json
 from datetime import datetime
 from functools import wraps, reduce
@@ -20,6 +20,9 @@ from flask_socketio import SocketIO
 from math import radians, sin, cos, sqrt, atan2
 import json
 import heapq
+from collections import deque
+from datetime import datetime
+
 
 app = Flask(__name__)
 app.config.update(
@@ -79,8 +82,6 @@ def get_routes_for_station(station_id):
         routes.update(station_obj['routes'])
     return list(routes)
 
-
-
 # Update stations with routes
 def update_stations_with_routes():
     for station_id, station_data in stations.items():
@@ -91,141 +92,45 @@ def update_stations_with_routes():
     with open('./data/stations_test.json', 'w') as file:
         json.dump(stations, file)
 
-def dijkstra(adjacency_map, start, end):
-    # Initialize distances, routes, and previous nodes
-    distances = {node: float('inf') for node in adjacency_map}
-    routes = {node: None for node in adjacency_map}
-    prev = {node: None for node in adjacency_map}
-    distances[start] = 0
-    
-    # Initialize priority queue
-    pq = [(0, start, None)]  # Include start route as None
-    
-    while pq:
-        # Get node with smallest distance
-        curr_distance, curr_node, curr_route = heapq.heappop(pq)
+def create_adjacency_map(stations_data):
+    # Extract routes for each station using station names as keys
+    stations_routes = {details['name']: details['routes'] for _, details in stations_data.items()}
 
-        # If node already visited, skip
-        if curr_distance > distances[curr_node]:
-            continue
-
-        # Update route for the current node
-        routes[curr_node] = curr_route
-
-        # If destination reached, reconstruct path and return
-        if curr_node == end:
-            path = []
-            route = []
-            while curr_node is not None:
-                path.append(curr_node)
-                route.append(routes[curr_node])  # Append current route
-                curr_node = prev[curr_node]  # Update current node
-            path.reverse()
-            route.reverse()
-            return round(distances[end], 2), path, route
-        
-        # Visit neighbors
-        for neighbor, route, weight in adjacency_map[curr_node]:
-            distance = curr_distance + weight
-            if distance < distances[neighbor]:
-                distances[neighbor] = distance
-                prev[neighbor] = curr_node
-                heapq.heappush(pq, (distance, neighbor, route))  # Include current route
-    
-    # If destination not reachable
-    return float('inf'), [], []
-
-
-
-
-
-
-def calculate_distance(lat1, lon1, lat2, lon2):
-    R = 6371  # Radius of the Earth in kilometers
-
-    # Convert latitude and longitude from degrees to radians
-    lat1_rad = radians(lat1)
-    lon1_rad = radians(lon1)
-    lat2_rad = radians(lat2)
-    lon2_rad = radians(lon2)
-
-    # Calculate the differences between latitudes and longitudes
-    dlat = lat2_rad - lat1_rad
-    dlon = lon2_rad - lon1_rad
-
-    # Calculate the distance using Haversine formula
-    a = sin(dlat / 2)**2 + cos(lat1_rad) * cos(lat2_rad) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-    distance = R * c
-
-    return round(distance, 2)
-
-def build_adjacency_map(station_data, threshold_distance):
+    # Create an adjacency map where keys are station names and values are sets of adjacent station names
     adjacency_map = {}
 
-    for station_id1, station1 in station_data.items():
-        adjacent_stations = []
-        for station_id2, station2 in station_data.items():
-            if station_id1 != station_id2:
-                distance = calculate_distance(station1['location'][0], station1['location'][1],
-                                              station2['location'][0], station2['location'][1])
-                if distance <= threshold_distance:
-                    for route in station1['routes']:  # Include routes from station1
-                        adjacent_stations.append((station_id2, route, distance))
-        adjacency_map[station_id1] = adjacent_stations
+    for station_name, routes in stations_routes.items():
+        adjacency_map[station_name] = list()
+        for other_station_name, other_routes in stations_routes.items():
+            if station_name != other_station_name and set(routes).intersection(other_routes):
+                adjacency_map[station_name].append(other_station_name)
 
     return adjacency_map
 
-
-
-def calculate_path(source_name, destination_name):
+def find_shortest_path(graph, start, goal):
+    queue = deque([[start]])
     
-    # Find IDs of source and destination stations
-    source_id = None
-    destination_id = None
-    for station_id, station in stations.items():
-        if station['name'] == source_name:
-            source_id = station_id
-            # print("Source id: ", source_id)
-        elif station['name'] == destination_name:
-            destination_id = station_id
-            # print("Dest id: ", destination_id)
-    
-    if source_id is None or destination_id is None:
-        print("Source or destination station not found.")
-        return None, None, None  # Return None if source or destination not found
-    
-    threshold_distance = 1.0  
-    adjacency_map = build_adjacency_map(stations, threshold_distance)
+    visited = set()
 
+    while queue:
+        path = queue.popleft()
+        vertex = path[-1]
+        if vertex == goal:
+            return path
+        elif vertex not in visited:
+            visited.add(vertex)
+            for current_neighbour in graph.get(vertex, []):
+                new_path = list(path)
+                new_path.append(current_neighbour)
+                queue.append(new_path)
+    return "No path found."
 
-    # Compute shortest path
-    shortest_distance, path, route = dijkstra(adjacency_map, source_id, destination_id)
-    
+def calculate_path(source_name, destination_name):    
+    adjacency_map = create_adjacency_map(stations)
+    shortest_path = find_shortest_path(adjacency_map, source_name, destination_name)  
     # Print results
-    print("Shortest distance from", source_id, "to", destination_id, ":", shortest_distance)
-    print("Path:", path)
-    print("Route: ", route)
-    return shortest_distance, path, route
-
-# Route handler for /plan-route endpoint
-@app.route('/plan-route', methods=['POST'])
-def plan_route():
-    source_name = request.form['source']
-    destination_name = request.form['destination']
-    
-    # Call the path function to compute the shortest path
-    shortest_distance, path_result, route_result = calculate_path(source_name, destination_name)
-    
-    # Pass the results to the template
-    return render_template('final_route.html', 
-                           source=source_name,
-                           destination=destination_name,
-                           shortest_distance=shortest_distance,
-                           path=path_result,
-                           route=route_result,
-                           stations=stations)
-
+    print("Shortest distance from", source_name, "to", destination_name, ":", shortest_path)
+    return shortest_path
 
 @app.route('/',methods=['GET'])
 def index():
@@ -237,32 +142,102 @@ def index():
 @app.route('/plan-route', methods=['GET'])
 def route_planner():
     # Extract station names from station data
-    station_names = [stations[station]['name'] for station in stations]
-    print(station_names)
+    station_names = set([stations[station]['name'] for station in stations])
     return render_template('route_planner.html', stations=station_names)
+
+@app.route('/plan-route', methods=['POST'])
+def plan_route():
+    source_name = request.form['source']
+    destination_name = request.form['destination']
+    
+    # Call the path function to compute the shortest path
+    shortest_path = calculate_path(source_name, destination_name)
+    
+    # Pass the results to the template
+    return render_template('final_route.html', 
+                           source=source_name,
+                           destination=destination_name,
+                           shortest_path=shortest_path)  # Pass shortest_path instead of shortest_distance
 
 @app.route('/by-location', methods=['GET'])
 def by_location():
     try:
-        location = (float(request.args['lat']), float(request.args['lon']))
+        lat = float(request.args['lat'])
+        lon = float(request.args['lon'])
     except KeyError as e:
-        print(e)
         return render_template('error.html', error='Missing lat/lon parameter')
+    except ValueError as e:
+        return render_template('error.html', error='Invalid lat/lon values')
 
-    data = mta.get_by_point(location, 5)
+    data = mta.get_by_point((lat, lon), 5)
+    updated = mta.last_update()
+        # Calculate the remaining minutes for each train
+    for station in data:
+        for direction in ['N', 'S']:  # Handling both directions
+            if direction in station:
+                for train in station[direction]:
+                    # Check if train['time'] is already a datetime object
+                    if isinstance(train['time'], datetime):
+                        train_time = train['time']
+                    elif isinstance(train['time'], str):
+                        train_time = datetime.fromisoformat(train['time'])
+                    else:
+                        continue  # Skip or handle unexpected data type
+                    
+                    remaining_minutes = int((train_time - updated).total_seconds() / 60)
+                    train['remaining_minutes'] = remaining_minutes
     return render_template('bylocation.html', data=data, updated=mta.last_update())
+
 
 @app.route('/by-route/<route>', methods=['GET'])
 def by_route(route):
-
     if route.islower():
         return redirect(request.host_url + 'by-route/' + route.upper(), code=301)
 
     try:
         data = mta.get_by_route(route)
-        return render_template('byRoute.html', data=data, updated=mta.last_update(), route=route)
+        updated = mta.last_update()
+        
+        # Convert updated to datetime if it's a string
+        if isinstance(updated, str):
+            updated = datetime.fromisoformat(updated)
+
+        # Calculate the remaining minutes for each train
+        for station in data:
+            for direction in ['N', 'S']:  # Handling both directions
+                if direction in station:
+                    for train in station[direction]:
+                        # Check if train['time'] is already a datetime object
+                        if isinstance(train['time'], datetime):
+                            train_time = train['time']
+                        elif isinstance(train['time'], str):
+                            train_time = datetime.fromisoformat(train['time'])
+                        else:
+                            continue  # Skip or handle unexpected data type
+                        
+                        remaining_minutes = int((train_time - updated).total_seconds() / 60)
+                        train['remaining_minutes'] = remaining_minutes
+
+        return render_template('byRoute.html', data=data, updated=updated, route=route)
     except KeyError:
         return render_template('error.html', error='Station not found')
+
+@app.route('/by-stations', methods=['GET', 'POST'])
+def by_stations():
+     # Extract station names from station data
+    station_names = set([stations[station]['name'] for station in stations])
+    if request.method == 'POST':
+        station_name = request.form['station_name']
+        # Search for the station by name and fetch the location
+        for station_id, station_info in stations.items():
+            if station_info['name'].lower() == station_name.lower():  # Case insensitive match
+                location = station_info['location']
+                lat, lon = location
+                return redirect(url_for('by_location', lat=lat, lon=lon))
+            
+        # return f"Search result for: {station_name}"
+    return render_template('by_stations.html', stations=station_names)
+
 
 @app.route('/by-id/<id_string>', methods=['GET'])
 def by_index(id_string):
@@ -277,8 +252,6 @@ def by_index(id_string):
 def get_routes():
     routes_data = sorted(mta.get_routes())
     return json.dumps(routes_data)
-
-
 
 # WebSocket event handlers
 
@@ -302,24 +275,3 @@ def handle_disconnect():
 if __name__ == '__main__':
     socketio.run(app, debug=True)
 
-
-def _envelope_reduce(a, b):
-    if a['last_update'] and b['last_update']:
-        return a if a['last_update'] < b['last_update'] else b
-    elif a['last_update']:
-        return a
-    else:
-        return b
-
-def _make_envelope(data):
-    time = None
-    if data:
-        time = reduce(_envelope_reduce, data)['last_update']
-
-    return {
-        'data': data,
-        'updated': time
-    }
-
-if __name__ == '__main__':
-    app.run(use_reloader=False)
