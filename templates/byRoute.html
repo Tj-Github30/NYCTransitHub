@@ -1,0 +1,58 @@
+{% extends 'base.html' %} {% block content %}
+
+<h1>Stations on Route {{ route }}</h1>
+<p>Last Updated: {{ updated.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+
+<div class="container">
+  {% for station in data %}
+  <div class="station">
+    <h2>{{ station.name }}</h2>
+
+    <div class="train-container">
+      {% if station.N %}
+      <table class="train-table">
+        <caption>
+          North Bound
+        </caption>
+        <thead>
+          <tr>
+            <th>▲ Route</th>
+            <th>Remaining Min</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for train in station.N %}
+          <tr>
+            <td><span class="arrow">▲</span>{{ train.route }}</td>
+            <td>{{ train.remaining_minutes }} min</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %} {% if station.S %}
+      <table class="train-table">
+        <caption>
+          South Bound
+        </caption>
+        <thead>
+          <tr>
+            <th>▼ Route</th>
+            <th>Remaining Min</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for train in station.S %}
+          <tr>
+            <td><span class="arrow">▼</span>{{ train.route }}</td>
+            <td>{{ train.remaining_minutes }} min</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% endblock %}

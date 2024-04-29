@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block content %}
+<div style="width: 50%;">
+  <h1>Search for a Station</h1>
+  <form action="/by-stations" method="post">
+    <input class="form-control" list="station" name="station_name" id="station_name-input" placeholder="Enter station name" />
+    <datalist id="station">
+      {% for station in stations %}
+      <option value="{{ station }}">{{ station }}</option>
+      {% endfor %}
+    </datalist>
+    <button type="submit" class="btn btn-outline-primary mt-3">Search</button>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,71 @@
+{% extends 'base.html' %} {% block content %}
+<div>
+  <h1 class="display-5 border-bottom">Nearest Stations:</h1>
+
+  {% for station in data %}
+  <h2 class="display-6">{{ station.name }}</h2>
+  <div class="row">
+    <div class="col">
+      <table class="table table-striped border">
+        <thead>
+          <tr>
+            <th scope="col">Route</th>
+            <th scope="col">ETA</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for train in station.N %}
+          <tr>
+            <td><span class="arrow"> ▲ </span>
+              <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}" width="30" height="24">
+            </td>
+            <td>{{ train.remaining_minutes }} mins</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="col">
+      <table class="table table-striped border">
+        <thead>
+          <tr>
+            <th scope="col">Route</th>
+            <th scope="col">ETA</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for train in station.S %}
+          <tr>
+            <td><span class="arrow"> ▼ </span>
+              <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}" width="30" height="24">
+            </td>
+            <td>{{ train.remaining_minutes }} mins</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- <table>
+    <thead>
+      <tr>
+        <th colspan="2">Southbound Trains</th>
+      </tr>
+      <tr>
+        <th>Route</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for train in station.S %}
+      <tr>
+        <td><span class="arrow"> ▼ </span>{{ train.route }}</td>
+        <td>{{ train.remaining_minutes }} mins</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table> -->
+  {% endfor %}
+</div>
+{% endblock %}

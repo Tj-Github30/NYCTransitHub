@@ -1,0 +1,15 @@
+{% extends 'base.html' %} {% block content %}
+
+<div>
+  <h1>Final Route</h1>
+  <p>Source Station: {{ source }}</p>
+  <p>Destination Station: {{ destination }}</p>
+  <p>Shortest path is:</p>
+  {% for station in shortest_path %}
+  <!-- Iterate over shortest_path -->
+  <p>{{ station }}</p>
+  <!-- Print station in the path -->
+  {% endfor %}
+</div>
+
+{% endblock %}

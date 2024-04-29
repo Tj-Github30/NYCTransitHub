@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>NYC Transit Routes</title>
+</head>
+<body>
+    <h1>NYC Transit Routes</h1>
+    <p>Last updated: {{ updated }}</p>
+    <ul>
+        {% for route in data %}
+            <li>{{ route }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>

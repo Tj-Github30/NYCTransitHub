@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<!-- <div>
+    <h1>Station Details</h1>
+    <ul>
+        {% for item in data %}
+            <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+</div> -->
+<div>
+    <h1>Station Details</h1>
+    <ul>
+        {% for item in data %}
+            <li><h2>{{ item.name }} - {{ item.last_update }}</h2></li>
+            <li><h3>Northbound Trains</h3></li>
+            <li>
+                <ul>
+                    {% for train in item.N %}
+                        <li>{{ train.route }} - {{ train.time }}</li>
+                        {% endfor %}
+                </ul>
+            </li>
+            <li><h3>Southbound Trains</h3></li>
+            <li>    
+                <ul>
+                    {% for train in item.S %}
+                        <li>{{ train.route }} - {{ train.time }}</li>
+                    {% endfor %}
+                </ul>
+            </li>
+            <li> routes: {{item.routes}}</li>
+            {% endfor %}
+            </ul>
+</div>
+{% endblock %}
