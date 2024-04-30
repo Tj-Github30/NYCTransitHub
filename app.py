@@ -203,15 +203,12 @@ def find_station():
     distance.append(curr_dist)
     station_lat = None
     station_lon = None
-    print(nearest_station)
     for station_id, station_info in stations.items():
         if station_info['name'] == nearest_station['name']:
             station_lat = float(station_info['location'][0])
             station_lon = float(station_info['location'][1])
             break
-    print(station_lat,station_lon)
     data = mta.get_by_point((station_lat,station_lon ), 5)
-    print(data)
     updated = mta.last_update()
         # Calculate the remaining minutes for each train
     for station in data:
