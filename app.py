@@ -198,7 +198,9 @@ def find_station():
     except ValueError:
         return render_template('error.html', error="Invalid latitude or longitude format.")
 
-    nearest_station, distance = find_nearest_station(lat, lon)
+    distance=[]
+    nearest_station, curr_dist = find_nearest_station(lat, lon)
+    distance.append(curr_dist)
     station_lat = None
     station_lon = None
     print(nearest_station)
@@ -209,9 +211,11 @@ def find_station():
             break
     print(station_lat,station_lon)
     data = mta.get_by_point((station_lat,station_lon ), 5)
+    print(data)
     updated = mta.last_update()
         # Calculate the remaining minutes for each train
     for station in data:
+        distance.append(calculate_distance(lat,lon,float(station['location'][0]),float(station['location'][1])))
         for direction in ['N', 'S']:  # Handling both directions
             if direction in station:
                 for train in station[direction]:
