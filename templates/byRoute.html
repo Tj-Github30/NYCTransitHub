@@ -3,50 +3,57 @@
 <h1>Stations on Route {{ route }}</h1>
 <p>Last Updated: {{ updated.strftime('%Y-%m-%d %H:%M:%S') }}</p>
 
-
 {% for station in data %}
-  <h2 class="display-6">{{ station.name }}</h2>
-  <div class="row">
-    <div class="col">
-      <table class="table table-striped border">
-        <thead>
-          <tr>
-            <th scope="col">Route</th>
-            <th scope="col">ETA</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for train in station.N %}
-          <tr>
-            <td><span class="arrow"> ▲ </span>
-              <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}" width="30" height="24">
-            </td>
-            <td>{{ train.remaining_minutes }} mins</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    <div class="col">
-      <table class="table table-striped border">
-        <thead>
-          <tr>
-            <th scope="col">Route</th>
-            <th scope="col">ETA</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for train in station.S %}
-          <tr>
-            <td><span class="arrow"> ▼ </span>
-              <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}" width="30" height="24">
-            </td>
-            <td>{{ train.remaining_minutes }} mins</td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
+<!-- Modify this part to include a clickable link to Google Maps -->
+<h2 class="display-6">
+  <a style="text-decoration: none; color: black"
+    href="https://maps.google.com?q={{ station.location[0] }},{{ station.location[1] }}" target="_blank"
+    title="Goto map">{{ station.name }}</a>
+</h2>
+<div class="row">
+  <div class="col">
+    <table class="table table-striped border">
+      <thead>
+        <tr>
+          <th scope="col">Route</th>
+          <th scope="col">ETA</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for train in station.N %}
+        <tr>
+          <td>
+            <span class="arrow"> ▲ </span>
+            <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}"
+              width="30" height="24" />
+          </td>
+          <td>{{ train.remaining_minutes }} mins</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
-  {% endfor %}
-{% endblock %}
+  <div class="col">
+    <table class="table table-striped border">
+      <thead>
+        <tr>
+          <th scope="col">Route</th>
+          <th scope="col">ETA</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for train in station.S %}
+        <tr>
+          <td>
+            <span class="arrow"> ▼ </span>
+            <img src="{{ url_for('static', filename='icons/' ~ train.route ~ '.svg') }}" alt="{{ train.route }}"
+              width="30" height="24" />
+          </td>
+          <td>{{ train.remaining_minutes }} mins</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endfor %} {% endblock %}

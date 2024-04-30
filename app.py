@@ -188,6 +188,45 @@ def by_location():
                     train['remaining_minutes'] = remaining_minutes
     return render_template('bylocation.html', data=data, updated=mta.last_update())
 
+@app.route('/find-station', methods=['GET'])
+def find_station():
+    try:
+        lat = float(request.args.get('lat'))
+        lon = float(request.args.get('lon'))
+    except TypeError:
+        return render_template('error.html', error="Invalid or missing latitude/longitude.")
+    except ValueError:
+        return render_template('error.html', error="Invalid latitude or longitude format.")
+
+    nearest_station, distance = find_nearest_station(lat, lon)
+    station_lat = None
+    station_lon = None
+    print(nearest_station)
+    for station_id, station_info in stations.items():
+        if station_info['name'] == nearest_station['name']:
+            station_lat = float(station_info['location'][0])
+            station_lon = float(station_info['location'][1])
+            break
+    print(station_lat,station_lon)
+    data = mta.get_by_point((station_lat,station_lon ), 5)
+    updated = mta.last_update()
+        # Calculate the remaining minutes for each train
+    for station in data:
+        for direction in ['N', 'S']:  # Handling both directions
+            if direction in station:
+                for train in station[direction]:
+                    # Check if train['time'] is already a datetime object
+                    if isinstance(train['time'], datetime):
+                        train_time = train['time']
+                    elif isinstance(train['time'], str):
+                        train_time = datetime.fromisoformat(train['time'])
+                    else:
+                        continue  # Skip or handle unexpected data type
+                    
+                    remaining_minutes = int((train_time - updated).total_seconds() / 60)
+                    train['remaining_minutes'] = remaining_minutes
+
+    return render_template('nearestStation.html', data=data, station=nearest_station,lat=lat,lon=lon ,distance=distance)
 
 @app.route('/by-route/<route>', methods=['GET'])
 def by_route(route):
@@ -252,6 +291,30 @@ def by_index(id_string):
 def get_routes():
     routes_data = sorted(mta.get_routes())
     return json.dumps(routes_data)
+
+
+
+def find_nearest_station(lat, lon):
+    min_distance = None
+    nearest_station = None
+    for station_id, station_info in stations.items():
+        station_lat, station_lon = station_info['location']
+        dist = calculate_distance(lat, lon, station_lat, station_lon)
+        if min_distance is None or dist < min_distance:
+            min_distance = dist
+            nearest_station = station_info
+
+    return nearest_station, min_distance
+
+def calculate_distance(lat1, lon1, lat2, lon2):
+    R = 3959  # Earth radius in miles
+    dLat = radians(lat2 - lat1)
+    dLon = radians(lon2 - lon1)
+    a = sin(dLat/2) * sin(dLat/2) + cos(radians(lat1)) * cos(radians(lat2)) * sin(dLon/2) * sin(dLon/2)
+    c = 2 * atan2(sqrt(a), sqrt(1-a))
+    distance = R * c
+    return distance 
+
 
 # WebSocket event handlers
 

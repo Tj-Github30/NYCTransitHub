@@ -1,9 +1,50 @@
 {% extends 'base.html' %} {% block content %}
 <div>
-  <div class="d-grid gap-2 col-6 mx-auto" style="margin-top: 10%;">
-    <button class="btn btn-primary" style="height: 10vh;" type="button" onclick="location.href='/plan-route'">Plan my route</button>
-    <button class="btn btn-primary" style="height: 10vh;" type="button" onclick="location.href='/by-stations'">Search By Station</button>
+  <div class="d-grid gap-2 col-6 mx-auto" style="margin-top: 10%">
+    <button class="btn btn-primary" style="height: 10vh" type="button" onclick="location.href='/plan-route'">
+      Plan my route
+    </button>
+    <button class="btn btn-primary" style="height: 10vh" type="button" onclick="location.href='/by-stations'">
+      Search By Station
+    </button>
+    <button class="btn btn-primary" style="height: 10vh" type="button" onclick="getLocation()">
+      Search By Current Location
+    </button>
+    <p id="status"></p>
+    <!-- Status message element -->
   </div>
   <!-- Add content specific to the home page -->
 </div>
+<script>
+  function getLocation() {
+    document.getElementById("status").innerHTML = "Fetching location...";
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(showPosition, showError);
+    } else {
+      document.getElementById("status").innerHTML = "Geolocation is not supported by this browser.";
+    }
+  }
+
+  function showPosition(position) {
+    document.getElementById("status").innerHTML = "Location fetched. Redirecting...";
+    window.location.href = `/find-station?lat=${position.coords.latitude}&lon=${position.coords.longitude}`;
+  }
+
+  function showError(error) {
+    switch (error.code) {
+      case error.PERMISSION_DENIED:
+        document.getElementById("status").innerHTML = "User denied the request for Geolocation.";
+        break;
+      case error.POSITION_UNAVAILABLE:
+        document.getElementById("status").innerHTML = "Location information is unavailable.";
+        break;
+      case error.TIMEOUT:
+        document.getElementById("status").innerHTML = "The request to get user location timed out.";
+        break;
+      case error.UNKNOWN_ERROR:
+        document.getElementById("status").innerHTML = "An unknown error occurred.";
+        break;
+    }
+  }
+</script>
 {% endblock %}
